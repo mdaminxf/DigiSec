@@ -1,5 +1,7 @@
 # Extensible DFIR MCP Platform (DigiSec)
 
+![logo](https://github.com/mdaminxf/DigiSec/blob/bcbd2a0c921706a0ae4b709a4c1f36aeb7c16b51/logo.png)
+
 > **SANS Hackathon Submission**
 > 
 > *An autonomous, zero-spoliation digital forensics platform. Wrap SIFT's tools into a type-safe MCP server, execute multi-source correlation, dynamically load zero-code YAML extensions, and output courtroom-ready PDF reports.*
