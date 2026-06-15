@@ -1,4 +1,4 @@
-# Extensible DFIR MCP Platform (Protocol SIFT)
+# Extensible DFIR MCP Platform (DigiSec)
 
 > **SANS Hackathon Submission**
 > 
