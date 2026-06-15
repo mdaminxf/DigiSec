@@ -34,7 +34,7 @@ load_plugins()
 load_yaml_plugins()
 
 mcp = FastMCP(
-    name="Extensible-DFIR-MCP",
+    name="DigiSec-MCP-Server",
     instructions="""CRITICAL RULES FOR AI AGENT:
 1. ZERO SPOLIATION: You are strictly FORBIDDEN from using raw Bash commands to mount disk images or extract memory.
 2. USE MCP TOOLS: You MUST use the provided type-safe MCP tools for all actions (e.g., `mount_e01_image`, `get_processes`). 

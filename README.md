@@ -134,7 +134,7 @@ Add the server to your `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "sift-dfir-mcp": {
+    "digisec-mcp-server": {
       "command": "/home/sansforensics/Desktop/sift-mcp/venv/bin/python",
       "args": [
         "/home/sansforensics/Desktop/sift-mcp/server.py"
