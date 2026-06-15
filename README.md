@@ -40,7 +40,10 @@ A([Prompt])-->B[Orchestrator]:::llm
 %% =========================
 subgraph T[TOOLS]
 direction TB
-C1[Isolation]:::isolate-->C2[Intel]:::tools-->C3[Disk]:::tools-->C4[Memory]:::tools
+C1[Isolation]:::isolate
+C2[Intel]:::tools
+C3[Disk]:::tools
+C4[Memory]:::tools
 end
 
 B-->C1
@@ -106,8 +109,10 @@ end
 %% =========================
 subgraph R[REPORT]
 direction TB
-G-->H1[Struct]-->H2[Sum]-->H3[Render]-->H4([Final]):::report
+H1[Struct]-->H2[Sum]-->H3[Render]-->H4([Final]):::report
 end
+
+G3-->H1
 ```
 
 ## 🚀 Setup & Execution
