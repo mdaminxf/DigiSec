@@ -1,0 +1,7 @@
+name: check_ip_reputation
+description: "Checks the reputation of an IP address using curl against a mock threat intel endpoint."
+arguments:
+  ip_address:
+    type: str
+    command: "curl -s 'https://api.bgpview.io/ip/{ip_address}'"
+

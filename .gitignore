@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+.venv/
+cases/
+mount_point/
+*.raw
+*.e01
+*.img
+*.vhd
+*.dd
+*.log
+*.jsonl
