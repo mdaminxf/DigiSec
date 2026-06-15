@@ -21,69 +21,93 @@ The platform acts as an unbreachable wall between the AI and the raw evidence, g
 ```mermaid
 graph LR
 
-%% Styles
+%% =========================
+%% STYLES
+%% =========================
 classDef llm fill:#4a148c,stroke:#fff,stroke-width:2px,color:#fff
 classDef tools fill:#0d47a1,stroke:#fff,stroke-width:1px,color:#fff
 classDef safe fill:#1b5e20,stroke:#fff,stroke-width:1px,color:#fff
 classDef report fill:#b71c1c,stroke:#fff,stroke-width:2px,color:#fff
 classDef isolate fill:#f57f17,stroke:#fff,stroke-width:2px,color:#fff
 
-%% Root: The investigation starts with a single natural language prompt
-A([Analyst Mega-Prompt]) --> B[AI Orchestrator]:::llm
+%% =========================
+%% ROOT
+%% =========================
+A([Prompt])-->B[Orchestrator]:::llm
 
-%% FIRST CALL LAYER: The AI dynamically routes to the major tool boundaries
-B --> C1[Evidence Isolation]:::isolate
-B --> C2[Threat Intelligence]:::tools
-B --> C3[Disk Forensics]:::tools
+%% =========================
+%% TOOLS FRAME
+%% =========================
+subgraph T[TOOLS]
+direction TB
+C1[Isolation]:::isolate-->C2[Intel]:::tools-->C3[Disk]:::tools-->C4[Memory]:::tools
+end
 
-%% SECOND CALL LAYER: Sub-tasks handled autonomously by the tools
-C1 --> D1[Scope Definition]
-C1 --> D2[Case Segregation]
+B-->C1
+B-->C2
+B-->C3
+B-->C4
 
-C3 --> D3[Read-Only Mount]
-C3 --> D4[MFT & Prefetch Extraction]
-C3 --> D5[File Normalization]
+%% =========================
+%% ISOLATION FRAME
+%% =========================
+subgraph I[ISOLATION]
+direction TB
+D1[Scope]
+D2[Case]
+end
 
-C2 --> D6[IOC Lookup]
-C2 --> D7[Reputation Check]
-C2 --> D8[MITRE Mapping]
+C1-->D1
+C1-->D2
 
-%% THIRD LAYER: Derived Outputs constrained by safety rules
-D3 --> E1[Disk Evidence Output]:::safe
-D4 --> E1
-D5 --> E1
+%% =========================
+%% DISK FRAME
+%% =========================
+subgraph D[DISK]
+direction TB
+D3[Mount]-->D4[MFT]-->D5[Norm]-->E1[DiskOut]:::safe
+end
 
-D6 --> E2[Threat Context Output]:::safe
-D7 --> E2
-D8 --> E2
+C3-->D3
 
-%% Isolated evidence feeds safely into memory extraction
-C1 --> E3[Memory Forensics]:::tools
-E3 --> F1[Memory Snapshot]
-E3 --> F2[Process Extraction]
-E3 --> F3[Network Mapping]
+%% =========================
+%% MEMORY FRAME
+%% =========================
+subgraph M[MEM]
+direction TB
+D6[Snap]-->D7[Proc]-->D8[Net]-->E2[MemOut]:::safe
+end
 
-F1 --> E4[Process Tree Output]:::safe
-F2 --> E4
-F3 --> E4
+C4-->D6
 
-%% FOURTH LAYER: The Anti-Hallucination Correlation Engine
-B --> G[Correlation Engine]:::safe
-E1 --> G
-E2 --> G
-E4 --> G
+%% =========================
+%% INTEL FRAME
+%% =========================
+subgraph TI[INTEL]
+direction TB
+D9[IOC]-->D10[Rep]-->D11[MITRE]-->E3[IntelOut]:::safe
+end
 
-G --> G1[Merge Evidence]
-G --> G2[Anomaly Detection]
-G --> G3[Validation Check]
-G --> G4[DFIR Findings]
+C2-->D9
 
-%% FINAL LAYER: Compiling the findings into the Executive PDF
-G --> H[Report Generation]:::report
-H --> H1[Structuring]
-H --> H2[Executive Summary]
-H --> H3[WeasyPrint Render]
-H --> H4([Final Courtroom-Ready PDF])
+%% =========================
+%% CORRELATION FRAME
+%% =========================
+subgraph C[CORR]
+direction TB
+E1-->G[Merge]
+E2-->G
+E3-->G
+G-->G1[Anom]-->G2[Valid]-->G3[Find]
+end
+
+%% =========================
+%% REPORT FRAME
+%% =========================
+subgraph R[REPORT]
+direction TB
+G-->H1[Struct]-->H2[Sum]-->H3[Render]-->H4([Final]):::report
+end
 ```
 
 ## 🚀 Setup & Execution
