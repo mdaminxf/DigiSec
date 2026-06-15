@@ -131,3 +131,5 @@ The server will dynamically generate a Python tool, inject the arguments safely,
 
 ## 📄 Executive PDF Reporting
 To prevent massive walls of unreadable text in the chat interface, the platform includes a WeasyPrint renderer (`plugins/analysis/custom_report.py`). The LLM will automatically generate elegant, styled HTML and compile it into a confidential PDF document saved directly to your workspace.
+
+# DigiSec
