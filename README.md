@@ -26,103 +26,68 @@ graph LR
 %% =========================
 %% STYLES
 %% =========================
+classDef prompt fill:#eceff1,stroke:#37474f,stroke-width:2px,color:#37474f
+classDef loader fill:#006064,stroke:#fff,stroke-width:2px,color:#fff
 classDef llm fill:#4a148c,stroke:#fff,stroke-width:2px,color:#fff
 classDef tools fill:#0d47a1,stroke:#fff,stroke-width:1px,color:#fff
 classDef safe fill:#1b5e20,stroke:#fff,stroke-width:1px,color:#fff
 classDef report fill:#b71c1c,stroke:#fff,stroke-width:2px,color:#fff
-classDef isolate fill:#f57f17,stroke:#fff,stroke-width:2px,color:#fff
-classDef storage fill:#37474f,stroke:#fff,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
-classDef loader fill:#006064,stroke:#fff,stroke-width:2px,color:#fff
+classDef storage fill:#37474f,stroke:#fff,stroke-width:2px,color:#fff,stroke-dasharray: 4 4
 
 %% =========================
-%% SYSTEM INITIALIZATION & ROOT
+%% STEP 1: INITIALIZATION & ENTRY
 %% =========================
-Y1[tools_config.yaml]:::loader -->|1. Parse Specs| Y2(Dynamic Tool Loader):::loader
-Y2 -->|2. Register FastMCP Manifest| B[Orchestrator]:::llm
-A([User Prompt]) --> B
-
-%% =========================
-%% TOOLS FRAME
-%% =========================
-subgraph T[TOOLS ENGINE]
-direction TB
-C1[Isolation]:::isolate
-C2[Intel]:::tools
-C3[Disk]:::tools
-C4[Memory]:::tools
-end
-
-B -->|3. Autonomous Trigger| T
-
-%% =========================
-%% DETAILED ENGINE SUBGRAPHS
-%% =========================
-subgraph I[ISOLATION]
-direction TB
-D1[Scope] --> D2[Case Space]
-end
-C1 --> D1
-
-subgraph D[DISK COMPONENT]
-direction TB
-D3[Mount] --> D4[MFT Parser] --> D5[Timeline Norm] --> E1[DiskOut]:::safe
-end
-C3 --> D3
-
-subgraph M[MEMORY COMPONENT]
-direction TB
-D6[Snapshot Info] --> D7[Process Tree] --> D8[Network Sockets] --> E2[MemOut]:::safe
-end
-C4 --> D6
-
-subgraph TI[INTEL COMPONENT]
-direction TB
-D9[IOC Extraction] --> D10[Reputation Check] --> D11[MITRE Mapping] --> E3[IntelOut]:::safe
-end
-C2 --> D9
-
-%% =========================
-%% 🔄 THE AUTONOMOUS FEEDBACK & SELF-CORRECTION LOOP
-%% =========================
-E1 -.->|Error/Telemetry Payload| B
-E2 -.->|Missing Dependencies/PIDs| B
-E3 -.->|Intel Signatures| B
-%% Meaning: This explicit feedback loop allows the AI to parse raw stderr/results and determine the next execution boundary completely hands-free.
-
-%% =========================
-%% CORRELATION FRAME
-%% =========================
-subgraph C[CORRELATION ENGINE]
-direction TB
-E1 --> G[Merge Streams]
-E2 --> G
-E3 --> G
-G --> G1[Anomaly Detection] --> G2[Validation] --> G3[Extracted Findings]
+subgraph S1 [1. INITIALIZATION & INGESTION]
+    A([User Case Prompt]):::prompt -->|Case Parameters| B(Orchestrator AI Core):::llm
+    Y1[tools_config.yaml]:::loader -->|Parse Runtime Specs| Y2(Dynamic Tool Loader):::loader
+    Y2 -->|Register FastMCP Manifest| B
 end
 
 %% =========================
-%% REPORT FRAME
+%% STEP 2: WORKSPACE & INTEGRITY LOCK
 %% =========================
-subgraph R[REPORT GENERATOR]
-direction TB
-H1[HTML Structure] --> H2[Executive Summary] --> H3[PDF Renderer] --> H4([Final PDF Report]):::report
-end
-G3 --> H1
-
-%% =========================
-%% 💾 THE SECURE SECURE STORAGE VAULT (PERSISTENCE LAYER)
-%% =========================
-subgraph ST[PERSISTENT FORENSIC VAULT]
-direction TB
-S1[(/Desktop/ Evidence Baseline <br> .e01 / .raw)]
-S2[(provenance_audit.jsonl <br> Cryptographic Trace Log)]:::safe
-S3[(case_rocba_final_report.md <br> Artifact Storage Cache)]:::report
+subgraph S2 [2. STORAGE BOUNDARY & IMMUTABILITY]
+    B -->|Verify Sandbox Paths| Vault1[(Evidence Baseline Vault <br> Read-Only .e01 / .raw)]:::storage
+    B -->|Initialize Non-Repudiation Trace| Vault2[(provenance_audit.jsonl Ledger)]:::safe
 end
 
-%% Storage Data Flow Links
-T -.->|Strict Non-Spoliation Read| S1
-T -.->|Real-time Machine Metrics Log| S2
-R -->|Export Deliverables| S3
+%% =========================
+%% STEP 3: AUTONOMOUS PROCESSING & RECOVERY LOOP
+%% =========================
+subgraph S3 [3. FORENSIC PROCESSING & RECOVERY LOOP]
+    B -->|Invoke| T1[Disk Tool: secure_ewf_mount]:::tools
+    T1 -->|Proceed| T2[Disk Tool: safe_mmls]:::tools
+    
+    %% Dynamic Error & Self-Correction Feedback Loop
+    T2 -.->|Geometry Trap: Status Error / Invalid Sector| B
+    B -.->|Autonomous Self-Correction Pivot| T3[Disk Tool: mount_logical_ntfs]:::tools
+    
+    T3 -->|Hand off control| T4[Memory Tool: windows.netscan]:::tools
+    T4 -->|Narrow boundaries| T5[Memory Tool: windows.cmdline / pslist]:::tools
+    T5 -->|Route signatures| T6[Intel Tool: Reputation & MITRE Mapping]:::tools
+end
+
+%% Real-time Machine Metrics Log Link during loop
+T1 & T2 & T3 & T4 & T5 & T6 -.->|Append Transaction Telemetry| Vault2
+
+%% =========================
+%% STEP 4: INTER-ARTIFACT CORRELATION ENGINE
+%% =========================
+subgraph S4 [4. INTER-ARTIFACT CORRELATION]
+    T6 -->|Pass findings| C1[Stream Merger]
+    C1 -->|Feed into| C2[Anomaly Validation Engine]
+    C2 -->|Solidify into| C3[Extracted Technical Findings]
+end
+
+%% =========================
+%% STEP 5: ASSURANCE DELIVERABLES & REPORTING
+%% =========================
+subgraph S5 [5. ASSURANCE DELIVERABLES]
+    C3 -->|Initiate| R1[HTML Summary Interface Builder]
+    R1 -->|Compile into| R2[Executive PDF Report Renderer]
+    R2 -->|Export files into| Vault3[(case_rocba_final_report.md Archive)]:::report
+    Vault3 --> H4([Final Case File Secured]):::report
+end
 ```
 
 ## 🚀 Setup & Execution
