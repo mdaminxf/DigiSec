@@ -31,16 +31,20 @@ classDef tools fill:#0d47a1,stroke:#fff,stroke-width:1px,color:#fff
 classDef safe fill:#1b5e20,stroke:#fff,stroke-width:1px,color:#fff
 classDef report fill:#b71c1c,stroke:#fff,stroke-width:2px,color:#fff
 classDef isolate fill:#f57f17,stroke:#fff,stroke-width:2px,color:#fff
+classDef storage fill:#37474f,stroke:#fff,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
+classDef loader fill:#006064,stroke:#fff,stroke-width:2px,color:#fff
 
 %% =========================
-%% ROOT
+%% SYSTEM INITIALIZATION & ROOT
 %% =========================
-A([Prompt])-->B[Orchestrator]:::llm
+Y1[tools_config.yaml]:::loader -->|1. Parse Specs| Y2(Dynamic Tool Loader):::loader
+Y2 -->|2. Register FastMCP Manifest| B[Orchestrator]:::llm
+A([User Prompt]) --> B
 
 %% =========================
 %% TOOLS FRAME
 %% =========================
-subgraph T[TOOLS]
+subgraph T[TOOLS ENGINE]
 direction TB
 C1[Isolation]:::isolate
 C2[Intel]:::tools
@@ -48,73 +52,77 @@ C3[Disk]:::tools
 C4[Memory]:::tools
 end
 
-B-->C1
-B-->C2
-B-->C3
-B-->C4
+B -->|3. Autonomous Trigger| T
 
 %% =========================
-%% ISOLATION FRAME
+%% DETAILED ENGINE SUBGRAPHS
 %% =========================
 subgraph I[ISOLATION]
 direction TB
-D1[Scope]
-D2[Case]
+D1[Scope] --> D2[Case Space]
 end
+C1 --> D1
 
-C1-->D1
-C1-->D2
-
-%% =========================
-%% DISK FRAME
-%% =========================
-subgraph D[DISK]
+subgraph D[DISK COMPONENT]
 direction TB
-D3[Mount]-->D4[MFT]-->D5[Norm]-->E1[DiskOut]:::safe
+D3[Mount] --> D4[MFT Parser] --> D5[Timeline Norm] --> E1[DiskOut]:::safe
 end
+C3 --> D3
 
-C3-->D3
-
-%% =========================
-%% MEMORY FRAME
-%% =========================
-subgraph M[MEM]
+subgraph M[MEMORY COMPONENT]
 direction TB
-D6[Snap]-->D7[Proc]-->D8[Net]-->E2[MemOut]:::safe
+D6[Snapshot Info] --> D7[Process Tree] --> D8[Network Sockets] --> E2[MemOut]:::safe
 end
+C4 --> D6
 
-C4-->D6
-
-%% =========================
-%% INTEL FRAME
-%% =========================
-subgraph TI[INTEL]
+subgraph TI[INTEL COMPONENT]
 direction TB
-D9[IOC]-->D10[Rep]-->D11[MITRE]-->E3[IntelOut]:::safe
+D9[IOC Extraction] --> D10[Reputation Check] --> D11[MITRE Mapping] --> E3[IntelOut]:::safe
 end
+C2 --> D9
 
-C2-->D9
+%% =========================
+%% 🔄 THE AUTONOMOUS FEEDBACK & SELF-CORRECTION LOOP
+%% =========================
+E1 -.->|Error/Telemetry Payload| B
+E2 -.->|Missing Dependencies/PIDs| B
+E3 -.->|Intel Signatures| B
+%% Meaning: This explicit feedback loop allows the AI to parse raw stderr/results and determine the next execution boundary completely hands-free.
 
 %% =========================
 %% CORRELATION FRAME
 %% =========================
-subgraph C[CORR]
+subgraph C[CORRELATION ENGINE]
 direction TB
-E1-->G[Merge]
-E2-->G
-E3-->G
-G-->G1[Anom]-->G2[Valid]-->G3[Find]
+E1 --> G[Merge Streams]
+E2 --> G
+E3 --> G
+G --> G1[Anomaly Detection] --> G2[Validation] --> G3[Extracted Findings]
 end
 
 %% =========================
 %% REPORT FRAME
 %% =========================
-subgraph R[REPORT]
+subgraph R[REPORT GENERATOR]
 direction TB
-H1[Struct]-->H2[Sum]-->H3[Render]-->H4([Final]):::report
+H1[HTML Structure] --> H2[Executive Summary] --> H3[PDF Renderer] --> H4([Final PDF Report]):::report
+end
+G3 --> H1
+
+%% =========================
+%% 💾 THE SECURE SECURE STORAGE VAULT (PERSISTENCE LAYER)
+%% =========================
+subgraph ST[PERSISTENT FORENSIC VAULT]
+direction TB
+S1[(/Desktop/ Evidence Baseline <br> .e01 / .raw)]
+S2[(provenance_audit.jsonl <br> Cryptographic Trace Log)]:::safe
+S3[(case_rocba_final_report.md <br> Artifact Storage Cache)]:::report
 end
 
-G3-->H1
+%% Storage Data Flow Links
+T -.->|Strict Non-Spoliation Read| S1
+T -.->|Real-time Machine Metrics Log| S2
+R -->|Export Deliverables| S3
 ```
 
 ## 🚀 Setup & Execution
